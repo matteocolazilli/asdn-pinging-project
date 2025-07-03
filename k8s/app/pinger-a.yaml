@@ -21,7 +21,7 @@ spec:
       automountServiceAccountToken: false
       containers:
       - name: pinger-a
-        image: YOUR_DOCKER_HUB_USERNAME/pinger-a:latest # Placeholder
+        image: matteoclz/pinger-a:latest # Placeholder
         ports:
         - containerPort: 8080
         resources:
