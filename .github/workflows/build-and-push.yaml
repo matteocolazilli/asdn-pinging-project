@@ -69,3 +69,12 @@ jobs:
     # Se vuoi deployare anche lo stack ELK in futuro, puoi aggiungere qui:
     # - name: Apply Kubernetes manifests for logging
     #   run: kubectl apply -f k8s/logging/
+
+  deploy-to-machine-a:
+    runs-on: [self-hosted, kind-machine-a] # Esegui su un runner self-hosted con l'etichetta 'kind-machine-a'
+    needs: [build-pinger-a, build-pinger-b] # Dipende dai job di build e push
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Apply Kubernetes manifests for app on Machine A
+        run: kubectl apply -f k8s/app/
