@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pinger-b-deployment
+  namespace: ping-app
+  labels:
+    app: pinger-b
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8000"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pinger-b
+  template:
+    metadata:
+      labels:
+        app: pinger-b
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: pinger-b
+        image: YOUR_DOCKER_HUB_USERNAME/pinger-b:latest # Placeholder
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "250m"
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pinger-b-service
+  namespace: ping-app
+spec:
+  clusterIP: None
+  selector:
+    app: pinger-b
