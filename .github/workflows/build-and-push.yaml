@@ -44,28 +44,6 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/pinger-b:latest
 
-  deploy-to-kind:
-    runs-on: ubuntu-latest
-    needs: [build-pinger-a, build-pinger-b] # Questo job dipende dal successo dei job di build e push
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'v1.28.2' # Puoi specificare la versione di kubectl che preferisci
-
-      - name: Configure Kubeconfig
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG_NGROK }}" > ~/.kube/config
-          chmod 600 ~/.kube/config
-        env:
-          KUBECONFIG_NGROK: ${{ secrets.KUBECONFIG_NGROK }}
-
-      - name: Apply Kubernetes manifests for app
-        run: kubectl apply -f k8s/app/
     # Se vuoi deployare anche lo stack ELK in futuro, puoi aggiungere qui:
     # - name: Apply Kubernetes manifests for logging
     #   run: kubectl apply -f k8s/logging/
