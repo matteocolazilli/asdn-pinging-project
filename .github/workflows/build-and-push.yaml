@@ -1,19 +1,25 @@
-name: Build and Push Docker Images
+name: Build, Push (multi-arch) and Deploy
 
 on:
   push:
     branches:
-      - main # Trigger il workflow ad ogni push sul branch 'main'
+      - main
 
 jobs:
+  # Build e push di pinger-a per linux/amd64 e linux/arm64
   build-pinger-a:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up QEMU (for multi-arch emulation)
+        uses: docker/setup-qemu-action@v2
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          install: true
 
       - name: Cache Python dependencies
         uses: actions/cache@v4
@@ -35,23 +41,30 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push pinger-a image
+      - name: Build and push pinger-a image (multi-arch)
         uses: docker/build-push-action@v5
         with:
           context: ./app/pinger-a
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/pinger-a:latest
+          platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  # Build e push di pinger-b per linux/amd64 e linux/arm64
   build-pinger-b:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up QEMU (for multi-arch emulation)
+        uses: docker/setup-qemu-action@v2
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          install: true
 
       - name: Cache Python dependencies
         uses: actions/cache@v4
@@ -73,24 +86,31 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push pinger-b image
+      - name: Build and push pinger-b image (multi-arch)
         uses: docker/build-push-action@v5
         with:
           context: ./app/pinger-b
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/pinger-b:latest
+          platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
- 
+
+  # Deploy su runner self-hosted solo dopo che entrambi i build hanno avuto successo
   deploy-to-machine-a:
-    runs-on: [self-hosted, kind-matteo, kind-davide] # Esegui su un runner self-hosted con l'etichetta 'kind-matteo' o 'kind-davide'
-    needs: [build-pinger-a, build-pinger-b] # Dipende dai job di build e push
+    runs-on: [self-hosted, kind-matteo, kind-davide]
+    needs:
+      - build-pinger-a
+      - build-pinger-b
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Setup kubectl #TODO: rimuovere l'installazione di kubectl automatica 
+
+      - name: Setup kubectl # rimuovi se già installato sul runner
         uses: azure/setup-kubectl@v3
         with:
           version: 'latest'
+
       - name: Apply Kubernetes manifests for app on Machine A
-        run: kubectl apply -f k8s/app/
+        run: |
+          kubectl apply -f k8s/app/
