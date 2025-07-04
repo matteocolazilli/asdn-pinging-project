@@ -49,5 +49,6 @@ jobs:
           context: ./app/${{ inputs.app_name }}
           push: true
           tags: ${{ inputs.docker_username }}/${{ inputs.app_name }}:latest
+          platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
