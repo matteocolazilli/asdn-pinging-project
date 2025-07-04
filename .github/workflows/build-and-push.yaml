@@ -98,7 +98,7 @@ jobs:
 
   # Deploy su runner self-hosted solo dopo che entrambi i build hanno avuto successo
   deploy-to-clusters:
-    runs-on: [self-hosted, kind-${{ matrix.machine_id }}]
+    runs-on: self-hosted
     needs:
       - build-pinger-a
       - build-pinger-b
