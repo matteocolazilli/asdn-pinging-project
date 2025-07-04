@@ -1,15 +1,11 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: pinger-a-deployment
+  name: pinger-a-statefulset
   namespace: ping-app
-  labels:
-    app: pinger-a
-  annotations:
-    prometheus.io/scrape: "true"
-    prometheus.io/port: "8000"
 spec:
-  replicas: 1
+  serviceName: "pinger-a-service"
+  replicas: 2
   selector:
     matchLabels:
       app: pinger-a
@@ -19,30 +15,35 @@ spec:
         app: pinger-a
     spec:
       automountServiceAccountToken: false
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - pinger-b
+            topologyKey: "kubernetes.io/hostname"
       containers:
       - name: pinger-a
         image: matteoclz/pinger-a:latest # Placeholder
-        ports:
-        - containerPort: 8080
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: TARGET_APP
+          value: "pinger-b"
+        - name: TARGET_SERVICE
+          value: "pinger-b-service"
         resources:
           requests:
+            memory: "32Mi"
+            cpu: "50m"
+          limits:
             memory: "64Mi"
             cpu: "100m"
-          limits:
-            memory: "128Mi"
-            cpu: "250m"
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /healthz
-            port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
