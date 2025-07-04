@@ -36,6 +36,16 @@ spec:
           mountPath: /var/run/docker.sock
         - name: runner-data
           mountPath: /_work
+        command: ["/bin/bash"]
+        args:
+          - "-c"
+          - >
+            ./config.sh --url $GITHUB_URL
+            --token $RUNNER_TOKEN
+            --name $RUNNER_NAME
+            --labels $RUNNER_LABELS
+            --work $RUNNER_WORKDIR &&
+            ./run.sh
       volumes:
       - name: docker-sock
         hostPath:
