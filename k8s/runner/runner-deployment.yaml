@@ -16,15 +16,19 @@ spec:
       serviceAccountName: github-runner-sa
       containers:
       - name: runner
-        image: summerwind/actions-runner:latest
+        image: ghcr.io/actions/actions-runner:latest
         env:
-        - name: REPO_URL
-          value: "https://github.com/matteocolazilli/asdn-pinging-project"
+        - name: RUNNER_NAME
+          value: "kind-MACHINE_IDENTIFIER"
+        - name: RUNNER_WORKDIR
+          value: "/_work"
         - name: RUNNER_TOKEN
           valueFrom:
             secretKeyRef:
               name: github-runner-secret
               key: runner-token
+        - name: GITHUB_URL
+          value: "https://github.com/matteocolazilli/asdn-pinging-project"
         - name: RUNNER_LABELS
           value: "kind-MACHINE_IDENTIFIER"
         volumeMounts:
