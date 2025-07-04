@@ -97,11 +97,14 @@ jobs:
           cache-to: type=gha,mode=max
 
   # Deploy su runner self-hosted solo dopo che entrambi i build hanno avuto successo
-  deploy-to-machine-a:
-    runs-on: [self-hosted, kind-matteo, kind-davide]
+  deploy-to-clusters:
+    runs-on: [self-hosted, kind-${{ matrix.machine_id }}]
     needs:
       - build-pinger-a
       - build-pinger-b
+    strategy:
+      matrix:
+        machine_id: [matteo, davide] # Elenca qui tutti gli identificatori delle macchine
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -111,6 +114,6 @@ jobs:
         with:
           version: 'latest'
 
-      - name: Apply Kubernetes manifests for app on Machine A
+      - name: Apply Kubernetes manifests for app on ${{ matrix.machine_id }}
         run: |
           kubectl apply -f k8s/app/
