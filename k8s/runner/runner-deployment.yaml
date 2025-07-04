@@ -1,36 +1,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: github-runner-deployment
+  name: github-runner-deployment-MACHINE_IDENTIFIER
   namespace: github-runner
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: github-runner
+      app: github-runner-MACHINE_IDENTIFIER
   template:
     metadata:
       labels:
-        app: github-runner
+        app: github-runner-MACHINE_IDENTIFIER
     spec:
       serviceAccountName: github-runner-sa
       containers:
       - name: runner
-        image: ghcr.io/actions/actions-runner:latest
+        image: summerwind/actions-runner:latest
         env:
-        - name: RUNNER_NAME
-          value: "kind-runner-machine-a"
-        - name: RUNNER_WORKDIR
-          value: "/_work"
+        - name: REPO_URL
+          value: "https://github.com/matteocolazilli/asdn-pinging-project"
         - name: RUNNER_TOKEN
           valueFrom:
             secretKeyRef:
               name: github-runner-secret
               key: runner-token
-        - name: GITHUB_URL
-          value: "https://github.com/matteocolazilli/asdn-pinging-project"
         - name: RUNNER_LABELS
-          value: "kind-machine-a"
+          value: "kind-MACHINE_IDENTIFIER"
         volumeMounts:
         - name: docker-sock
           mountPath: /var/run/docker.sock

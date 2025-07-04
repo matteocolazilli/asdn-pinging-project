@@ -83,7 +83,7 @@ jobs:
           cache-to: type=gha,mode=max
  
   deploy-to-machine-a:
-    runs-on: [self-hosted, kind-machine-a] # Esegui su un runner self-hosted con l'etichetta 'kind-machine-a'
+    runs-on: [self-hosted, kind-matteo, kind-davide] # Esegui su un runner self-hosted con l'etichetta 'kind-matteo' o 'kind-davide'
     needs: [build-pinger-a, build-pinger-b] # Dipende dai job di build e push
     steps:
       - name: Checkout code
