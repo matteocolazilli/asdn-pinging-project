@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: pinger-a-statefulset
+  name: pinger-a
   namespace: ping-app
 spec:
   serviceName: "pinger-a-service"
