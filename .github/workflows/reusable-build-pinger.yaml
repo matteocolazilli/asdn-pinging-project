@@ -1,0 +1,53 @@
+name: Reusable Build and Push Pinger
+
+on:
+  workflow_call:
+    inputs:
+      app_name: # e.g., pinger-a or pinger-b
+        required: true
+        type: string
+      docker_username: # Docker Hub username
+        required: true
+        type: string
+      docker_password: # Docker Hub password/token
+        required: true
+        type: string
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles(format('app/{0}/requirements-dev.txt', inputs.app_name)) }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install Python dependencies for linting
+        run: pip install -r app/${{ inputs.app_name }}/requirements-dev.txt
+
+      - name: Lint with ruff
+        run: ruff check ./app/${{ inputs.app_name }}
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ inputs.docker_username }}
+          password: ${{ inputs.docker_password }}
+
+      - name: Build and push ${{ inputs.app_name }} image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./app/${{ inputs.app_name }}
+          push: true
+          tags: ${{ inputs.docker_username }}/${{ inputs.app_name }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

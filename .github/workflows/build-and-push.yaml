@@ -81,14 +81,14 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/pinger-b:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
+ 
   deploy-to-machine-a:
     runs-on: [self-hosted, kind-machine-a] # Esegui su un runner self-hosted con l'etichetta 'kind-machine-a'
     needs: [build-pinger-a, build-pinger-b] # Dipende dai job di build e push
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Setup kubectl
+      - name: Setup kubectl #TODO: rimuovere l'installazione di kubectl automatica 
         uses: azure/setup-kubectl@v3
         with:
           version: 'latest'
