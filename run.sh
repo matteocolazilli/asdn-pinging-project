@@ -1,5 +1,5 @@
 kind delete cluster
-kind create cluster --config kind-config.yaml
+kind create cluster --config kind/kind-config.yaml
 kubectl apply -f k8s/app/
 
 echo "Waiting for all pods to be ready..."

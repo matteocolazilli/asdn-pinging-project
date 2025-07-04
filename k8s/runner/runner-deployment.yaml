@@ -44,7 +44,9 @@ spec:
             --token $RUNNER_TOKEN
             --name $RUNNER_NAME
             --labels $RUNNER_LABELS
-            --work $RUNNER_WORKDIR &&
+            --work $RUNNER_WORKDIR
+            --unattended
+            --replace &&
             ./run.sh
       volumes:
       - name: docker-sock
