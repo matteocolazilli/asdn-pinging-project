@@ -88,5 +88,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
       - name: Apply Kubernetes manifests for app on Machine A
         run: kubectl apply -f k8s/app/
