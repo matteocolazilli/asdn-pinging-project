@@ -5,25 +5,23 @@ metadata:
   namespace: github-runner
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
-  name: github-runner-role
-  namespace: ping-app # I permessi sono validi solo in questo namespace
+  name: github-runner-clusterrole
 rules:
 - apiGroups: ["", "apps"]
-  resources: ["statefulsets", "services"]
+  resources: ["statefulsets", "services", "namespaces"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
-  name: github-runner-binding
-  namespace: ping-app # Il binding avviene nel namespace target
+  name: github-runner-clusterrole-binding
 subjects:
 - kind: ServiceAccount
   name: github-runner-sa
-  namespace: github-runner # Specifica il namespace del ServiceAccount
+  namespace: github-runner
 roleRef:
-  kind: Role
-  name: github-runner-role
+  kind: ClusterRole
+  name: github-runner-clusterrole
   apiGroup: rbac.authorization.k8s.io
